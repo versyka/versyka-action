@@ -20,6 +20,7 @@ const LOCKFILES = /(^|\/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.loc
 const MANIFEST = /(^|\/)(package\.json|pyproject\.toml|Pipfile|requirements[^/]*\.txt)$/;
 const GATEWAY_PREFIX = /^(?:models|openai|anthropic|google|gemini|vertex_ai|vertexai|azure|azure_ai|bedrock|mistral|mistralai|cohere|openrouter|litellm)[/:]/;
 const BEDROCK = /^(?:(?:us|eu|apac|global|us-gov)\.)?anthropic\.(.+?)(?:-v\d+(?::\d+)?)?$/;
+const BEDROCK_ID = /^(?:(?:us|eu|apac|global|us-gov)\.)?([a-z0-9-]+\.[a-z0-9][a-z0-9.:-]*)$/;
 const TOKEN = /[A-Za-z0-9][A-Za-z0-9._:@/-]{1,120}/g;
 const QUOTE = /["'`]/;
 
@@ -33,9 +34,32 @@ export function normalizeModelId(raw) {
   return id.replace("@", "-");
 }
 
+/** A Bedrock model ID as Bedrock lists it ("meta.llama3-70b-instruct-v1:0"), without a cross-Region prefix; null otherwise. */
+export function bedrockModelId(raw) {
+  return raw.trim().toLowerCase().match(BEDROCK_ID)?.[1] ?? null;
+}
+
+// Same as the site's retirementIndex (src/core/model-scan.ts): undated names for 8-digit-dated IDs.
 export function retirementIndex(models) {
   const index = new Map();
-  for (const r of models) for (const id of r.ids) index.set(normalizeModelId(id), r);
+  for (const r of models) {
+    // Rows marked scan: false are for reference only (ambiguous IDs); two dates for one ID keep the later one.
+    if (r.scan === false) continue;
+    for (const id of r.ids) {
+      // Bedrock IDs keep their "provider.…-v1:0" form, so Bedrock's dates apply on Bedrock and Anthropic's elsewhere.
+      const key = r.vendor === "Amazon Bedrock" ? bedrockModelId(id) ?? normalizeModelId(id) : normalizeModelId(id);
+      const prev = index.get(key);
+      if (!prev || r.shutdown >= prev.shutdown) index.set(key, r);
+    }
+  }
+  const undated = new Map();
+  for (const [id, r] of index) {
+    const base = id.replace(/-\d{8}$/, "");
+    if (base === id || index.has(base)) continue;
+    const prev = undated.get(base);
+    if (!prev || r.shutdown > prev.shutdown) undated.set(base, r);
+  }
+  for (const [base, r] of undated) index.set(base, r);
   return index;
 }
 
@@ -53,7 +77,8 @@ export function scanSource(text, path, index) {
     const seen = new Set();
     const line = lines[i];
     for (const m of line.matchAll(TOKEN)) {
-      const id = normalizeModelId(m[0]);
+      const bedrock = bedrockModelId(m[0]);
+      const id = bedrock && index.has(bedrock) ? bedrock : normalizeModelId(m[0]);
       if (!index.has(id) || seen.has(id)) continue;
       if (!id.includes("-") && !(QUOTE.test(line[m.index - 1] ?? "") && QUOTE.test(line[m.index + m[0].length] ?? ""))) continue;
       seen.add(id);
@@ -177,7 +202,9 @@ export async function run() {
     command("warning", `Versyka couldn't load the model retirement list (${err.message}). Skipping this run.`);
     return;
   }
-  const index = retirementIndex(data.models);
+  // `calendarOnly` holds rows older versions of this action must not read (see /api/model-retirements); this version
+  // applies the same rules as the site to them: scan: false rows are skipped, Bedrock rows keep their own IDs.
+  const index = retirementIndex([...data.models, ...(data.calendarOnly ?? [])]);
 
   const files = walk(root);
   const hits = [];

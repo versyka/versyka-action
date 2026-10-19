@@ -2,8 +2,8 @@
 
 A GitHub Action that catches two things before they break production:
 
-- **AI model IDs that are retired or retiring.** OpenAI, Anthropic, Google Gemini, Mistral and Cohere retire models on fixed dates, and calls to them start failing. The action finds every model ID in your code and config, including Bedrock, Vertex AI, LiteLLM and OpenRouter spellings, and reports the date, the vendor's replacement and each file and line.
-- **API SDKs that are major versions behind** (OpenAI, Anthropic, Stripe, AWS, Twilio and about 40 more on npm and PyPI), with release notes and migration guides.
+- **AI model IDs that are retired or retiring.** OpenAI, Anthropic, Google Gemini, Mistral and Cohere retire models on fixed dates, and so do platforms that host them: Amazon Bedrock and Groq. Calls to a retired model start failing. The action finds every model ID in your code and config, including Vertex AI, LiteLLM and OpenRouter spellings, and reports the date, the replacement and each file and line. Bedrock IDs (`anthropic.claude-…-v1:0`, `meta.llama3-…-v1:0`) get Bedrock's own dates, which can differ from the model maker's.
+- **API SDKs that are major versions behind** (OpenAI, Anthropic, Stripe, AWS, Twilio and 100+ API vendors on npm and PyPI), with release notes and migration guides.
 
 It writes a job summary, annotates the lines in the pull request diff, and leaves one pull request comment that it updates on every push.
 
