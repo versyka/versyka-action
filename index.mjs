@@ -81,6 +81,8 @@ export function scanSource(text, path, index) {
       const id = bedrock && index.has(bedrock) ? bedrock : normalizeModelId(m[0]);
       if (!index.has(id) || seen.has(id)) continue;
       if (!id.includes("-") && !(QUOTE.test(line[m.index - 1] ?? "") && QUOTE.test(line[m.index + m[0].length] ?? ""))) continue;
+      // Capitals ("GPT-4") are how prose names a model: only a quoted value, or one after "=", counts.
+      if (/[A-Z]/.test(m[0]) && !((QUOTE.test(line[m.index - 1] ?? "") && QUOTE.test(line[m.index + m[0].length] ?? "")) || /=\s*$/.test(line.slice(0, m.index)))) continue;
       seen.add(id);
       hits.push({ id, path, line: i + 1 });
     }
