@@ -1,0 +1,28 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Syntax check
+        run: node --check index.mjs
+      - name: Run the action on the fixture
+        id: versyka
+        uses: ./
+        with:
+          path: test/fixture
+          comment: "false"
+          fail-on: none
+      - name: It found the retired model
+        run: |
+          echo "retired=${{ steps.versyka.outputs.retired }}"
+          test "${{ steps.versyka.outputs.retired }}" -ge 1

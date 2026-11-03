@@ -1,0 +1,31 @@
+name: Missed model or false alarm
+description: The action missed a model ID, flagged something that isn't a model call, or shows a wrong date.
+labels: [bug]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What happened?
+      options:
+        - It missed a model ID
+        - It flagged something that isn't a model call
+        - The date or replacement is wrong
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model ID
+      description: Exactly as written in the code, for example "gpt-3.5-turbo" or "anthropic.claude-v2:1".
+    validations:
+      required: true
+  - type: textarea
+    id: line
+    attributes:
+      label: The line in your code
+      description: Paste the line (remove anything private). Include the file type, for example .py or .env.
+      render: text
+  - type: input
+    id: source
+    attributes:
+      label: Vendor page with the right date (if the date is wrong)

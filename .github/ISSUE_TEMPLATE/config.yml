@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/versyka/versyka-action/discussions
+    about: Ask a question or share an idea in Discussions.
+  - name: Model retirement calendar
+    url: https://www.versyka.com/model-retirements
+    about: Every tracked model with its shutdown date and replacement.

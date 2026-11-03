@@ -1,0 +1,22 @@
+name: Bug report
+description: The action failed, crashed or did something unexpected.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Your workflow step
+      description: The `uses: versyka/versyka-action@...` step with its inputs.
+      render: yaml
+  - type: textarea
+    id: log
+    attributes:
+      label: Log output
+      description: The action's log from the workflow run (remove anything private).
+      render: text
