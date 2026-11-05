@@ -22,7 +22,13 @@ The action is one file, `index.mjs`, with no dependencies, so there is nothing t
 4. Check the syntax: `node --check index.mjs`.
 5. Open the pull request and say what changed and why. CI runs the action on `test/fixture` and checks that it still finds the retired model.
 
+**Tests:** a pull request that adds or changes detection (a new model spelling, a new file type, a new SDK) must add a matching case to `test/fixture`, so CI proves it. CodeQL also scans every pull request.
+
 Not sure where to start? Look at issues labelled [good first issue](https://github.com/versyka/versyka-action/labels/good%20first%20issue). Questions go in [Discussions](https://github.com/versyka/versyka-action/discussions).
+
+## Security
+
+Report security problems privately, as described in [SECURITY.md](SECURITY.md), not in an issue.
 
 ## Ground rules
 
