@@ -18,8 +18,10 @@ const SCANNED = /\.(py|ipynb|ts|tsx|js|jsx|mjs|cjs|go|java|kt|rb|php|cs|rs|swift
 const SKIPPED_DIR = /^(node_modules|dist|build|out|\.next|vendor|\.venv|venv|env|site-packages|__pycache__|\.tox|\.git|coverage|target)$/;
 const LOCKFILES = /(^|\/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb?|poetry\.lock|Pipfile\.lock|uv\.lock|composer\.lock|Gemfile\.lock|Cargo\.lock|go\.sum)$/;
 const MANIFEST = /(^|\/)(package\.json|pyproject\.toml|Pipfile|requirements[^/]*\.txt)$/;
-const GATEWAY_PREFIX = /^(?:models|openai|anthropic|google|gemini|vertex_ai|vertexai|azure|azure_ai|bedrock|mistral|mistralai|cohere|openrouter|litellm)[/:]/;
+const GATEWAY_PREFIX = /^(?:models|openai|anthropic|google|gemini|vertex_ai|vertexai|azure|azure_ai|bedrock|mistral|mistralai|cohere|openrouter|litellm|xai|deepseek|perplexity|fireworks_ai)[/:]/;
 const BEDROCK = /^(?:(?:us|eu|apac|global|us-gov)\.)?anthropic\.(.+?)(?:-v\d+(?::\d+)?)?$/;
+const VERTEX_PATH = /^(?:projects\/[^/]+\/locations\/[^/]+\/)?publishers\/[^/]+\/models\//;
+const MAAS_PUBLISHER = /^[a-z0-9-]+\/(?=[a-z0-9][a-z0-9.-]*-maas$)/;
 const BEDROCK_ID = /^(?:(?:us|eu|apac|global|us-gov)\.)?([a-z0-9-]+\.[a-z0-9][a-z0-9.:-]*)$/;
 const TOKEN = /[A-Za-z0-9][A-Za-z0-9._:@/-]{1,120}/g;
 const QUOTE = /["'`]/;
@@ -29,6 +31,7 @@ export const shouldScanPath = (p) => SCANNED.test(p) && !LOCKFILES.test(p) && !/
 export function normalizeModelId(raw) {
   let id = raw.trim().toLowerCase().replace(/[.:/-]+$/, "");
   for (let i = 0; i < 3 && GATEWAY_PREFIX.test(id); i++) id = id.replace(GATEWAY_PREFIX, "");
+  id = id.replace(VERTEX_PATH, "").replace(MAAS_PUBLISHER, "");
   const bedrock = id.match(BEDROCK);
   if (bedrock) id = bedrock[1];
   return id.replace("@", "-");
