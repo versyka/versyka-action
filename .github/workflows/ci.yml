@@ -22,7 +22,9 @@ jobs:
           path: test/fixture
           comment: "false"
           fail-on: none
-      - name: It found the retired model
+      - name: It found exactly the two retired calls
+        # app.py: gpt-3.5-turbo (OpenAI). bedrock.py: a Bedrock ID with Bedrock's own date (v1.1.0).
+        # notes.py names GPT-4-0613 in a comment, which is prose and must not count (v1.1.1).
         run: |
           echo "retired=${{ steps.versyka.outputs.retired }}"
-          test "${{ steps.versyka.outputs.retired }}" -ge 1
+          test "${{ steps.versyka.outputs.retired }}" -eq 2

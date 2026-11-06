@@ -18,7 +18,7 @@ The action is one file, `index.mjs`, with no dependencies, so there is nothing t
    INPUT_PATH=test/fixture INPUT_COMMENT=false node index.mjs
    ```
 
-   It prints the same summary the pull request comment shows. `test/fixture` holds a file with a retired model, so you should see at least one result.
+   It prints the same summary the pull request comment shows. `test/fixture` holds two retired calls and one model named only in a comment, so you should see exactly 2 retired models.
 4. Check the syntax: `node --check index.mjs`.
 5. Open the pull request and say what changed and why. CI runs the action on `test/fixture` and checks that it still finds the retired model.
 
