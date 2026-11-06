@@ -4,7 +4,7 @@
 // Your source code never leaves the runner: the model scan runs here against the public retirement
 // list. Only dependency manifests (package.json, requirements*.txt, pyproject.toml, Pipfile) are sent to
 // the Versyka upgrade check, which reads package names and versions and stores nothing.
-import { appendFileSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { appendFileSync, closeSync, fstatSync, openSync, readFileSync, readdirSync } from "node:fs";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -120,7 +120,7 @@ function walk(root) {
   return out;
 }
 
-const md = (s) => String(s).replace(/\|/g, "\\|");
+const md = (s) => String(s).replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 /** The Markdown for the job summary and the pull request comment. */
@@ -215,8 +215,15 @@ export async function run() {
     const isManifest = MANIFEST.test(path);
     if (!isManifest && !shouldScanPath(path)) continue;
     const full = join(root, path);
-    if (statSync(full).size > MAX_SCAN_BYTES) continue;
-    const text = readFileSync(full, "utf8");
+    // Size check and read on one open file, so the file can't change between them.
+    const fd = openSync(full, "r");
+    let text;
+    try {
+      if (fstatSync(fd).size > MAX_SCAN_BYTES) continue;
+      text = readFileSync(fd, "utf8");
+    } finally {
+      closeSync(fd);
+    }
     if (shouldScanPath(path)) hits.push(...scanSource(text, path, index));
     if (isManifest && manifests.length < MAX_MANIFESTS) manifests.push({ path, text });
   }
