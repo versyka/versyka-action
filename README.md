@@ -5,6 +5,7 @@
 [![CI](https://github.com/versyka/versyka-action/actions/workflows/ci.yml/badge.svg)](https://github.com/versyka/versyka-action/actions/workflows/ci.yml)
 [![Marketplace](https://img.shields.io/badge/Marketplace-Versyka-orange?logo=github)](https://github.com/marketplace/actions/versyka-ai-model-retirements-and-sdk-upgrades)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16371/badge)](https://www.bestpractices.dev/projects/16371)
 
 ![The Versyka check on openai/openai-quickstart-python: 2 retired models in 4 places and 1 SDK two majors behind](docs/demo.png)
 
